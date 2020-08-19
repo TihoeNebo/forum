@@ -3,12 +3,14 @@ const pars = require("body-parser");
 const mysql = require("mysql2");
 const exphbs = require("express-handlebars");
 const hbs= require("hbs");
+const cookiePars = require("cookie-parser");
 
 const jpars = pars.json();
 const app = express();
 
 let arr = [];
-
+let timerId = 0;
+let isUser = false;
 const sqldroptable='DROP TABLE IF EXISTS forumlist';
 
 app.engine("hbs", exphbs(
@@ -53,14 +55,49 @@ connection.query(`create  table if not exists preority
   postId mediumint(8) unsigned default 0)`)
   .catch( (err) => {console.log(err);});
 
+createRoot();
+
 console.log('Подключено');
+
+function createRoot() {
+
+  connection.query(`create table if not exists parts (
+    partId tinyint(3) unsigned not null auto_increment,
+    partName varchar(40) not null,
+    primary key(partId))`).catch( (err) => {console.log(err);});
+
+  connection.query(`create table if not exists forums (
+    forumId tinyint(3) unsigned not null auto_increment,
+    partId tinyint(3) unsigned not null,
+    forumURN varchar(40) not null,
+    forumName varchar(40) not null, 
+    primary key(forumId))`).catch( (err) => {console.log(err);});
+
+  connection.query(`create  table if not exists users (
+    userId mediumint unsigned not null auto_increment,
+    login varchar(22) not null,
+    pass varchar(33),
+    mail varchar(22),
+    access tinyint unsigned default 0,
+    ref tinyint unsigned default 0,
+    sex tinyint(1) default 0,
+    registered datetime not null,
+    lastComing datetime,
+    primary key(userId))`).catch( (err) => {console.log(err);});
+
+  connection.query(`create  table if not exists online (
+    userId mediumint unsigned,
+    url varchar(150), 
+    title varchar(70))`).catch( (err) => {console.log(err);});
+
+}
 
 function Partlist() {
   return 'SELECT * FROM parts';
 }
 
 async function getNames(forumURN, topicId) {
-  //let topicId = topicId||0;
+
   const self = this;
 
   let sqlForumName = `select forumName from forums where forumURN = "${forumURN}"`;
@@ -77,8 +114,28 @@ async function getNames(forumURN, topicId) {
   console.log(this.arr);
   return this.arr;
 }
+let p = 0;
+//==============USE=====================
+app.use(cookiePars());
 
+app.use("/", function(req, res, next) {
+p = p +1;
+res.cookie('v', p);
+next();});
 app.use("/script.js", express.static(__dirname + "/script.js"));
+
+app.use("/online", function(req, res) {
+
+  function isHere() {
+    console.log("User is out");
+    isUser = false;}
+
+  if (!isUser) {
+    isUser = true;
+    return timerId = setTimeout( isHere, 30000);
+  } else { clearTimeout(timerId);
+    return timerId = setTimeout( isHere, 30000); };
+});
 
 //=================GET==================
 
@@ -214,8 +271,8 @@ app.post("/createForum", jpars, async function (req, res) {
   
   console.log(topicName, topicComment, firstPost);
 
-  let sqlNewTopic = `insert into ${forumData.forumURN}_topics(theme, comment, userId) values( '${topicName}', '${topicComment}', 0)`;
-  let sqlNewPost = `insert into ${forumData.forumURN}_posts(topicId, content, userId, postDate) values( 1, '${firstPost}', 0, NOW() )`; 
+  let sqlNewTopic = `insert into ${forumData.forumURN}_topics(theme, comment, userId, essential) values( '${topicName}', '${topicComment}', 0, 1)`;
+  let sqlNewPost = `insert into ${forumData.forumURN}_posts(topicId, content, userId, postDate, essential) values( 1, '${firstPost}', 0, NOW(), 1)`; 
  
   if (req.body.isNewPart) {
       console.log(arr[0].partName);
@@ -260,6 +317,7 @@ app.post("/createForum", jpars, async function (req, res) {
       'comment varchar(70), ' +
       'userId mediumint unsigned not null, ' +
       'views int unsigned default 0, ' +
+      'essential tinyint(1) default 0, ' +
       'foreign key (forumId) references forums (forumId) on delete cascade) default charset = utf8';
 
     let sqlcreateposts = 'create table if not exists ' + name +'_posts (' +
@@ -268,6 +326,7 @@ app.post("/createForum", jpars, async function (req, res) {
       'userId mediumint unsigned not null, ' +
       'content mediumtext not null, ' +
       'postDate datetime not null, ' +
+      'essential tinyint(1) default 0, ' +
       'foreign key (topicId) references ' + name + '_topics (topicId) on delete cascade) default charset = utf8';
     
     await connection.query(sqlcreatetopics).catch( (err) => {console.log(err);});
@@ -282,7 +341,7 @@ app.post("/:forumURN/createTopic", jpars, async function(req, res) {
     let inp = Object.values(req.body.topic);
     await connection.query(`INSERT INTO ${req.params.forumURN}_topics(theme, comment, userId) VALUES(?, ?, ?)`, inp)
       .catch( (err) => {console.log(err);});
-    await connection.query(`INSERT INTO ${req.params.forumURN}_posts(content, userId, topicId, postDate) VALUES(?, ?, last_insert_id(), NOW())`, [req.body.firstPost, req.body.topic.userId])
+    await connection.query(`INSERT INTO ${req.params.forumURN}_posts(content, userId, topicId, postDate, essential) VALUES(?, ?, last_insert_id(), NOW(), 1)`, [req.body.firstPost, req.body.topic.userId])
       .catch( (err) => {console.log(err);});
     return res.json(req.body);
 });
