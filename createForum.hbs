@@ -1,0 +1,39 @@
+﻿
+<form name='createForum'>
+<fieldset>
+  <legend>Раздел:</legend>
+  <input type='radio' id='partsList' name='partMethod' value='selectPart' checked>
+    <label for='partsList'>Выбрать раздел:
+      <select name='parts'>
+      {{#each parts}}
+        <option>{{this.partName}}</option>
+      {{/each}}
+      </select>
+    </label><br />
+
+  <input type='radio' id='newPart' name='partMethod' value='addPart'>
+    <label for='newPart'>Создать новый раздел: 
+      <input type='text' name='addPart' />
+    </label><br />
+</fieldset>
+
+<fieldset>
+  <legend>Новый форум:</legend>
+  URN форума:
+  <input type='text' name='forumURN' /><br />
+  Название форума:
+  <input type='text' name='forumName' /><br />
+</fieldset>
+<fieldset>
+
+Название темы: <input type="text" name="theme" /><br />
+Описание:            <input type="text" name="comment" /><br />
+Сообщение: <br />
+<textarea name="firstPost"></textarea><br />
+
+</fieldset>
+
+<input type='button' name='addForum' id = 'addForum' value='Создать' /><br />
+</form>
+
+

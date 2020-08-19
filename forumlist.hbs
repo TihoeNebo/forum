@@ -1,0 +1,17 @@
+﻿Разделы:
+
+  <div>
+    {{#dislocateParts forums}}
+        <tr>
+          <td class='forumName' id='{{this.forumId}}' data-urn = '{{this.forumURN}}'><a href="/{{this.forumURN}}" class="forumTitle">{{this.forumName}}</a> <br />
+          {{this.comment}}</td>
+          <td>{{this.sumTopics}}</td>
+          <td>{{this.sumPosts}}</td>
+          <td><a href="/{{this.forumURN}}/{{this.topicId}}?p={{ceil this.lastPage}}#{{this.lastPostId}}">смотреть</a><br />{{getDate this.lastPostDate}}</td>
+        </tr>
+     {{/dislocateParts}}
+    </table>
+  </div>
+
+<a href='/createForum'>Создать форум</a>
+a5768a8c19b4bc08dc93ae29fdf543655e0af15bad86c51a425160b6b70035d5

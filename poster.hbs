@@ -1,0 +1,57 @@
+﻿<p>Сообщения:</p>
+{{hh}}
+<form name="poster">
+<textarea name="post"></textarea>
+<input type="submit" name="send" value = "Отправить">
+<script>
+const poster = document.forms.poster;
+const send = poster.elements.send;
+const messages = document.getElementById('content');
+
+const ajax = new XMLHttpRequest();
+
+
+send.onclick = (e) => {
+  e.preventDefault();
+  
+  let post = poster.elements.post.value;
+  let arr = post.split('');
+
+  for(let i=0; i< arr.length; i++) {
+    switch (arr[i]) {
+      case '"':
+      case "'":
+      case '`':
+      case '[':
+      case ']':
+      case '}':
+      case '{':
+        arr[i] = `\"`;
+        break;
+      case "<":
+        arr[i] += "\b";
+        break;
+      case "\n":
+        arr[i] = "<br />";
+        break;
+    };
+  };    
+  arr = arr.join(''); 
+  let message = JSON.stringify( {mess: arr} );
+
+  ajax.open('POST', '/');
+  ajax.setRequestHeader("Content-Type", "application/json");
+  ajax.send(message);
+};
+
+ajax.onload = () => {
+
+      let div = document.createElement('div');
+
+      let addPost = JSON.parse(ajax.response);
+      div.innerHTML = addPost.mess;
+      messages.appendChild(div);
+
+ } ;          
+
+</script>
