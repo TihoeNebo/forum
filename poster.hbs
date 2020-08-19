@@ -1,57 +1,30 @@
-﻿<p>Сообщения:</p>
-{{hh}}
+﻿<a href='/{{params.forumURN}}'>назад к форуму "{{names.forumName}}"</a><br />
+<div class = 'topicTitle' id = '{{names.topicId}}'>
+  <h2>Тема: <span class='theme'>{{names.theme}}</span></h2>
+  <h3 class = 'comment'>{{names.comment}}</h3>
+</div>
+Сообщения:
+<div id = "contents">
+{{#each messages}}
+  {{#if this.essential}}
+  <div id ="{{this.postId}}" class = "essential post">
+    <div class ='content'>{{getPosts this.content}}</div>
+  </div>
+  {{/if}}
+{{/each}}
+{{#each messages}}
+  {{#if this.essential}}
+  {{else}}
+  <div id ="{{this.postId}}" class = "post">
+    <div class ='content'>{{getPosts this.content}}</div>
+  </div>
+  {{/if}}
+{{/each}}
+</div>
+<div>{{pages}}</div>
+<a href='/{{params.forumURN}}'>назад к форуму "{{names.forumName}}"</a>
 <form name="poster">
 <textarea name="post"></textarea>
-<input type="submit" name="send" value = "Отправить">
-<script>
-const poster = document.forms.poster;
-const send = poster.elements.send;
-const messages = document.getElementById('content');
+<input type="button" name="send" id = 'sendPost' value = "Отправить">
+</form>
 
-const ajax = new XMLHttpRequest();
-
-
-send.onclick = (e) => {
-  e.preventDefault();
-  
-  let post = poster.elements.post.value;
-  let arr = post.split('');
-
-  for(let i=0; i< arr.length; i++) {
-    switch (arr[i]) {
-      case '"':
-      case "'":
-      case '`':
-      case '[':
-      case ']':
-      case '}':
-      case '{':
-        arr[i] = `\"`;
-        break;
-      case "<":
-        arr[i] += "\b";
-        break;
-      case "\n":
-        arr[i] = "<br />";
-        break;
-    };
-  };    
-  arr = arr.join(''); 
-  let message = JSON.stringify( {mess: arr} );
-
-  ajax.open('POST', '/');
-  ajax.setRequestHeader("Content-Type", "application/json");
-  ajax.send(message);
-};
-
-ajax.onload = () => {
-
-      let div = document.createElement('div');
-
-      let addPost = JSON.parse(ajax.response);
-      div.innerHTML = addPost.mess;
-      messages.appendChild(div);
-
- } ;          
-
-</script>
