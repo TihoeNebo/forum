@@ -2,7 +2,7 @@
 const ajax = new XMLHttpRequest();
 const menu = document.createElement('div');
 menu.id = 'editMenu';
-alert(document.cookie);
+//alert(document.cookie);
 let isOpened = false;
 let deletedPosts = [];
 let deletedTopics = [];
@@ -478,10 +478,10 @@ function trans(post) {
   return arr;
 }
 
-function sayH() {
+/*function sayH() {
 
         ajax.open('get',  '/online');
         ajax.send();
       }
 
-setInterval(sayH, 7000);
+setInterval(sayH, 7000);*/

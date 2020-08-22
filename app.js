@@ -64,14 +64,14 @@ function createRoot() {
   connection.query(`create table if not exists parts (
     partId tinyint(3) unsigned not null auto_increment,
     partName varchar(40) not null,
-    primary key(partId))`).catch( (err) => {console.log(err);});
+    primary key(partId)) default charset = utf8`).catch( (err) => {console.log(err);});
 
   connection.query(`create table if not exists forums (
     forumId tinyint(3) unsigned not null auto_increment,
     partId tinyint(3) unsigned not null,
     forumURN varchar(40) not null,
     forumName varchar(40) not null, 
-    primary key(forumId))`).catch( (err) => {console.log(err);});
+    primary key(forumId)) default charset = utf8`).catch( (err) => {console.log(err);});
 
   connection.query(`create  table if not exists users (
     userId mediumint unsigned not null auto_increment,
@@ -83,7 +83,7 @@ function createRoot() {
     sex tinyint(1) default 0,
     registered datetime not null,
     lastComing datetime,
-    primary key(userId))`).catch( (err) => {console.log(err);});
+    primary key(userId)) default charset = utf8`).catch( (err) => {console.log(err);});
 
   connection.query(`create  table if not exists online (
     userId mediumint unsigned,
@@ -115,16 +115,35 @@ async function getNames(forumURN, topicId) {
   return this.arr;
 }
 let p = 0;
+let n = 0;
+let visiters = new Object();
 //==============USE=====================
 app.use(cookiePars());
 
 app.use("/", function(req, res, next) {
-p = p +1;
-res.cookie('v', p);
-next();});
+  console.log(req.cookies['v']);
+  let isVisiter = false;
+  for (let key in visiters) {
+    if (visiters[key] == req.cookies['v']) {
+      isVisiter = true;
+    };
+    if (visiters[key] === undefined) { visiters[key].delete};
+  };
+  if (!isVisiter) {
+    n = n +1;
+    visiters['visitor' + n] = req.cookies['v'];
+  };
+  console.log(visiters.length);
+  if ( !req.cookies['v'] && req.cookies ['isUser'] != 'true' ) {
+    p = p +1;
+    res.cookie('v', p, {path: '/'});
+    next();
+  } else next();
+});
+
 app.use("/script.js", express.static(__dirname + "/script.js"));
 
-app.use("/online", function(req, res) {
+/*app.use("/online", function(req, res) {
 
   function isHere() {
     console.log("User is out");
@@ -135,7 +154,7 @@ app.use("/online", function(req, res) {
     return timerId = setTimeout( isHere, 30000);
   } else { clearTimeout(timerId);
     return timerId = setTimeout( isHere, 30000); };
-});
+});*/
 
 //=================GET==================
 
@@ -241,15 +260,17 @@ app.get("/", async function (req, res) {
       left join ${name}_posts on ${name}_posts.topicId = ${name}_topics.topicId 
       group by ${name}_topics.topicId `; 
   }
-
+  if (arr.length == 1) {
   tempTable += select(arr[0].forumURN);
+  tempTable += 'order by lastPostId desc';};
 
   if (arr.length > 1) {
     for ( let i = 1; i < arr.length; i++) {
       tempTable += 'union (' + select(arr[i].forumURN) + ') ';
     }; 
+    tempTable += 'order by lastPostId desc';
   };
-  tempTable += 'order by lastPostId desc';
+
 
   await connection.query( tempTable).catch( (err) => {console.log(err);});
   await connection.query( joinTable)
@@ -264,7 +285,7 @@ app.get("/", async function (req, res) {
 
 app.post("/createForum", jpars, async function (req, res) {
   let forumData = req.body.forumData;
-
+console.log(forumData);
   let topicName = req.body.topicName;
   let topicComment = req.body.topicComment;
   let firstPost = req.body.firstPost;
@@ -274,14 +295,14 @@ app.post("/createForum", jpars, async function (req, res) {
   let sqlNewTopic = `insert into ${forumData.forumURN}_topics(theme, comment, userId, essential) values( '${topicName}', '${topicComment}', 0, 1)`;
   let sqlNewPost = `insert into ${forumData.forumURN}_posts(topicId, content, userId, postDate, essential) values( 1, '${firstPost}', 0, NOW(), 1)`; 
  
-  if (req.body.isNewPart) {
-      console.log(arr[0].partName);
+   if (req.body.isNewPart) {
+      
     
     for(let i = 0; i < arr.length; i++) {
       if (arr[i].partName == forumData.partName) {
         return res.json('такой раздел уже есть');
       };
-    };
+    }; 
     
     await connection.query('insert into parts(partName) values(?)', forumData.partName).catch( (err) => {console.log(err);});
   }; 
