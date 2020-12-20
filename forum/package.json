@@ -1,0 +1,16 @@
+{
+  "name": "forum",
+  "version": "1.0.0",
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "crypto": "^1.0.1",
+    "events": "^3.2.0",
+    "express": "^4.16.4",
+    "express-handlebars": "^3.1.0",
+    "hbs": "^4.0.4",
+    "https": "^1.0.0",
+    "mongodb": "^3.1.0",
+    "mysql2": "^1.6.5",
+    "nodemailer": "^6.4.13"
+  }
+}

@@ -1,0 +1,45 @@
+﻿<a href='/{{params.forumURN}}'>назад к форуму "{{names.forumName}}"</a><br />
+<div class = 'topicTitle' id = '{{names.topicId}}'>
+  <h2>Тема: <span class='theme'>{{names.theme}}</span></h2>
+  <h3 class = 'comment'>{{names.comment}}</h3>
+  {{#if isLogin}}{{#if isSubscribed}}<input type='button' id = 'discribe' value = 'Отписаться' />{{else}}<input type='button' id = 'subscribe' value = 'Подписаться' />{{/if}}{{/if}}
+</div>
+Сообщения:
+<div id = "contents">
+{{#each messages}}
+  {{#if this.essential}}
+  <div id ="{{this.postId}}" class = "essential post" {{#if this.redactable}}data-redactable = true{{/if}} data-postid = '{{this.postId}}'>
+    <div class='userBoard' data-userId='{{this.userId}}' data-userName='{{this.userName}}'> {{this.userName}}<br>
+      {{#if this.isLive}}on-line{{else}}off-line{{/if}}<br>
+      <a href='/profile/{{this.userId}}'><input type='button' value = 'профиль'/></a> 
+      {{#if isLogin}}<input type='button' class = 'pm' value = 'написать лично'/>{{/if}}
+    </div>
+    <div class ='content'>{{getPosts this.content}}</div>
+  </div>
+  {{/if}}
+{{/each}}
+{{#each messages}}
+  {{#if this.essential}}
+  {{else}}
+  <div id ="{{this.postId}}" class = "post" {{#if this.redactable}}data-redactable = true{{/if}} {{#if this.deletable}}data-deletable = true{{/if}}  data-postid = '{{this.postId}}'>     
+    <div class='userBoard' data-userId='{{this.userId}}' data-userName='{{this.userName}}'> {{this.userName}}<br>
+      {{#if this.isLive}}on-line{{else}}off-line{{/if}}<br>
+      <a href='/profile/{{this.userId}}'><input type='button' value = 'профиль'/></a> 
+      {{#if isLogin}}<input type='button' class = 'pm' value = 'написать лично'/>{{/if}}
+    </div>
+    <div class ='content'>{{getPosts this.content}}</div>
+  </div>
+  {{/if}}
+{{/each}}
+</div>
+<div>{{pages}}</div>
+<a href='/{{params.forumURN}}'>назад к форуму "{{names.forumName}}"</a>
+{{#if userProfile.isConfurmed}}
+{{#if names.closed}}
+{{else}}
+<form name="poster">
+<textarea name="post"></textarea>
+<input type="button" name="send" id = 'sendPost' value = "Отправить">
+</form>
+{{/if}}
+{{/if}}

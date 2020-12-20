@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <script type="module" src="/script.js" async></script>
+
+</head>
+<body>
+<header>
+{{#if isLogin}}{{> logined}}
+  {{else}}
+  <a id='register'>Зарегистрироваться</a></br>
+  <a id='login'>Войти</a>
+{{/if}}<br>
+
+</header>
+
+{{{body}}}
+<footer>
+{{#each online}}
+<a href='/profile/{{this.userId}}' data-userid='{{this.userId}}'>{{this.userName}}</a>
+{{/each}}
+</footer>
+</body>
+</html>
