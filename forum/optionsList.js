@@ -3,14 +3,14 @@
   const userId = e.target.dataset.userid;
   let template = `<form name='accountOptions'>
     <ul>
-    <li > <span onclick='this.parentElement.children[1].hidden = !this.parentElement.children[1].hidden'>Изменить адрес электронной почты</span>
-      <fieldset hidden='1'>
+    <li > 
+      <fieldset><span>Изменить адрес электронной почты:</span><br>
         Новый адрес: <input type='text' name = 'mail' value='${mail}' />
         <input type='button' id = 'changeMail' value='Изменить' />
       </fieldset>
     </li>
-    <li ><span onclick='this.parentElement.children[1].hidden = !this.parentElement.children[1].hidden'>Изменить пароль </span>
-        <fieldset hidden='1'>
+    <li >
+        <fieldset><span>Изменить пароль: </span><br>
           Старый пароль: <input type='text' name = 'oldPass' /><br>
           Новый пароль: <input type='text' name = 'newPass' /><br>
           Повторить пароль: <input type='text' name = 'repeatPass' /><br>
@@ -68,8 +68,8 @@ export async function getProfileOptions(e) {
   let template = `
     <ul>
       <form name='profileOptions'>
-      <li > <span onclick='this.parentElement.children[1].hidden = !this.parentElement.children[1].hidden'>Изменить имя пользователя</span>
-        <fieldset hidden='1'>
+      <li > 
+        <fieldset><span>Изменить имя пользователя:</span><br>
           Новое имя: <input type='text' name = 'userName' value='${userName}' />
           <input type='button' id = 'changeName' value='Изменить' />
         </fieldset>
@@ -83,9 +83,9 @@ export async function getProfileOptions(e) {
         </fieldset>
       </li>
       </form>
-      <li>Сменить дату рождения:
+      <li>
         <form name = 'redactor'>
-          <fieldset> 
+          <fieldset> Сменить дату рождения:<br>
             <select name='Year'></select><select name='Month'></select><select name='Day'></select><br />
             <label><input type = 'checkbox' name='notSelected' value='true'>  не указывать дату.</label>
           <input type='button' id = 'changeBirthday' value='Изменить' />

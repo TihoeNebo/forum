@@ -250,22 +250,19 @@ document.onclick = async (e) => {
   }
 
   if (target.classList.contains('options') ){
+    let requests = await import('/optionsList.js');
     switch(target.id){
      case 'account':
-       let {getAccountOptions} = await import('/optionsList.js');
-       getAccountOptions(e);
+       requests.getAccountOptions(e);
        break;
      case 'profile':
-       let {getProfileOptions} = await import('/optionsList.js');
-       getProfileOptions(e);
+       requests.getProfileOptions(e);
        break;
      case 'subscribes':
-       let {getSubscribeOptions} = await import('/optionsList.js');
-       await getSubscribeOptions(e);
+       await requests.getSubscribeOptions(e);
        break;
      case 'blackList':
-       let {getBlackListOptions} = await import('/optionsList.js');
-       await getBlackListOptions();
+       await requests.getBlackListOptions();
        break;
     }
   }
