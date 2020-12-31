@@ -165,6 +165,12 @@ a:hover {
   width: 200px;
   margin: 1px;
   border-width: 0;
+  min-height: 60px;
+  padding-top: 5px;
+}
+
+.excluded {
+  margin: 0;
 }
 
 .topicParameter {
@@ -496,6 +502,11 @@ form[name='createForum'] {
 li {
   display: block;
   list-style-type: none;
+}
+
+.deleteSub {
+  float: right;
+  left: 300px;
 }
 
 input[type='button']:hover, button:hover {

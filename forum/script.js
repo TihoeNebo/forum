@@ -139,47 +139,26 @@ function hideElems (parent) {
 }
 
 function setMenu(code, isDelitable = 0, isClosed = 0) {
-  let del = (isDelitable) ? "<button id = 'delete' type='button'>Удалить</button>": "";
-  let close = (isClosed) ? "<button id = 'openTopic' type='button'>Открыть тему</button>" : "<button id = 'closeTopic'>Закрыть тему</button>";
-  let move = (isDelitable) ? "<button id='moveTopic' type='button'>Переместить</button>": "";  
-  const buttons = { 
-    edit: "<button id = 'edit' type='button'>Редактировать</button>",
-    del: del,
-    close: close,
-    move: move,
-    title: "<span id='editTitle'>Название:    <input type = 'text' name = 'title'></span><br/>",
-    comment: "<span id='editComment'>Описание:    <input type = 'text' name = 'comment'></span><br/>",
-    URN: "<span id='editURN'>URN форума: <input type = 'text' name = 'forumURN'></span>",
-    content: "<textarea class='editContent' name = 'content'></textarea>",
-    cancel: "<button id = 'cancel' type='button'>Отмена</button>",
-    save: "<button id = 'save' type='button'>Сохранить</button>" 
-  };
-  let deleted = (code == 256);
-  let menuElems = '';
-  let inForm = false;
-  let arr = Object.values(buttons);
-  code = code.toString(2).split('').reverse();
+  let elems = "";
+  elems += (code&1) ? "<button id = 'edit' type='button'>Редактировать</button>" : '';
+  elems += (code&2 && isDelitable) ? "<button id = 'delete' type='button'>Удалить</button>": "";  
+  elems += (code&4 && isClosed) ? "<button id = 'openTopic' type='button'>Открыть тему</button>" : '';
+  elems += (code&4 && !isClosed) ? "<button id = 'closeTopic'>Закрыть тему</button>": '';
+  elems += (code&8 && isDelitable) ? "<button id='moveTopic' type='button'>Переместить</button>": ""; 
 
-  for(let i = 0; i < code.length; i++) {
-    if(code[i] == 0) continue;
-    if (i > 3 && !inForm) {
-      menuElems += "<form class='redactMenu' name = 'redactor'>";
-      inForm = true;
-    };
-    menuElems += arr[i];   
-  };
-  if (inForm) {
-   menuElems += "</form>";
-   isOpened = true;
-  };
-      
+  elems += (code >= 16 && code != 256) ? "<form class='redactMenu' name = 'redactor'>" : "";
+  elems += (code&16) ? "<span id='editTitle'>Название:    <input type = 'text' name = 'title'></span><br/>" : "";
+  elems += (code&32) ? "<span id='editComment'>Описание:    <input type = 'text' name = 'comment'></span><br/>" : "";
+  elems += (code&64) ? "<span id='editURN'>URN форума: <input type = 'text' name = 'forumURN'></span>" : "";
+  elems += (code&128) ? "<textarea class='editContent' name = 'content'></textarea>" : "";
+  elems += (code&256) ? "<button id = 'cancel' type='button'>Отмена</button>" : "";
+  elems += (code&512) ? "<button id = 'save' type='button'>Сохранить</button>" : ""; 
+  elems += (code >= 16 && code != 256) ? "</form>" : "";
+  isOpened = (code >= 16) ? true : isOpened;
+  isOpened = (code == 256) ? false : isOpened;
   menu.hidden = false;
-  menu.innerHTML = menuElems;
-  if (deleted) {
-    isOpened = false;
-    document.getElementById('cancel').textContent = 'Восстановить';
-  };
-  return menu;                  
+  menu.innerHTML = elems;
+  return menu;
 }
 
 function sortParentTree(target) {
@@ -630,8 +609,35 @@ document.onclick = async (e) => {
       if ( target.id == 'editMenu' || target.id == 'regList') break;
       target = target.parentElement;
     }; 
-    if (target == document.body) return;
+
     hideElems(target.parentElement);
+    if ( target.parentElement.classList.contains('post') &&  target.parentElement.classList.contains('deleted') ) {
+
+      let message = JSON.stringify({id: target.parentElement.id} );
+      ajax.open('DELETE', '/' +path[0] + '/deletePosts');
+      ajax.setRequestHeader("Content-Type", "application/json");
+      ajax.send(message);
+      ajax.onload = ()=> {
+        target.parentElement.classList.remove('deleted');
+        target.parentElement.removeChild( target.parentElement.getElementsByClassName('excluded')[0] );
+        target.innerHTML = '';
+      }
+    }
+      
+    if ( target.parentElement.classList.contains('topic') && target.parentElement.classList.contains('deleted') ) {
+
+      let message = JSON.stringify({id: target.parentElement.id} );
+      ajax.open('DELETE', '/' +path[0] + '/deleteTopics');
+      ajax.setRequestHeader("Content-Type", "application/json");
+      ajax.send(message);
+      ajax.onload = ()=> {
+        target.parentElement.classList.remove('deleted');
+        target.parentElement.removeChild( target.parentElement.getElementsByClassName('excluded')[0] );
+        target.innerHTML = '';
+      }
+    }
+
+    return;
   };
 
   if (e.target.id == 'moveTopic') {
