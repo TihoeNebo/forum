@@ -11,6 +11,11 @@ let openedPMs = [];
 //localStorage.clear();
 checkTopics();
 
+if (path[0] == "me") {
+  let loadOptions = new Promise(function(resolve, reject) {
+    resolve( import('/optionsList.js') );
+  }).then( (requests) => {requests.getAccountOptions(document.getElementById('account'))});
+}
 if (document.forms.mail)  document.forms.mail.elements.newAdress.value = localStorage.getItem('mail');
 
 if (document.getElementById('banTimer') ) {
@@ -112,14 +117,14 @@ async function authentificate(target) {
     let {regList} = await import( '/regList.js');
     let {selectBirthDay} = await import( '/regList.js'); 
 
-    target.insertAdjacentHTML('beforeEnd', regList);
+    document.body.insertAdjacentHTML('beforeEnd', regList);
     selectBirthDay();
     isOpened = true;
   }
   if (!isOpened && target.id == 'login'){
     let {loginList} = await import( '/regList.js');
       
-    target.insertAdjacentHTML('beforeEnd', loginList);
+    document.body.insertAdjacentHTML('beforeEnd', loginList);
     document.forms.redactor.elements.userName.value = localStorage.getItem('mail') || 'электронная почта';
     document.forms.redactor.elements.password.value = localStorage.getItem('pass') || 'пароль';
     isOpened = true;
@@ -134,22 +139,22 @@ function hideElems (parent) {
 }
 
 function setMenu(code, isDelitable = 0, isClosed = 0) {
-  let del = (isDelitable) ? "<div id = 'delete'>Удалить</div>": "";
-  let close = (isClosed) ? "<div id = 'openTopic'>Открыть тему</div>" : "<div id = 'closeTopic'>Закрыть тему</div>";
-  let move = (isDelitable) ? "<div id='moveTopic'>Переместить</div>": "";  
+  let del = (isDelitable) ? "<button id = 'delete' type='button'>Удалить</button>": "";
+  let close = (isClosed) ? "<button id = 'openTopic' type='button'>Открыть тему</button>" : "<button id = 'closeTopic'>Закрыть тему</button>";
+  let move = (isDelitable) ? "<button id='moveTopic' type='button'>Переместить</button>": "";  
   const buttons = { 
-    edit: "<div id = 'edit'>Редактировать</div>",
+    edit: "<button id = 'edit' type='button'>Редактировать</button>",
     del: del,
     close: close,
     move: move,
-    title: "Название: <input type = 'text' name = 'title'><br />",
-    comment: "Описание: <input type = 'text' name = 'comment'><br />",
-    URN: "URN форума: <input type = 'text' name = 'forumURN'>",
-    content: "<textarea name = 'content'></textarea>",
-    cancel: "<div id = 'cancel'>Отмена</div>",
-    save: "<div id = 'save'>Сохранить</div>" 
+    title: "<span id='editTitle'>Название:    <input type = 'text' name = 'title'></span><br/>",
+    comment: "<span id='editComment'>Описание:    <input type = 'text' name = 'comment'></span><br/>",
+    URN: "<span id='editURN'>URN форума: <input type = 'text' name = 'forumURN'></span>",
+    content: "<textarea class='editContent' name = 'content'></textarea>",
+    cancel: "<button id = 'cancel' type='button'>Отмена</button>",
+    save: "<button id = 'save' type='button'>Сохранить</button>" 
   };
-  let deleted = (code == 256) ? true : false;
+  let deleted = (code == 256);
   let menuElems = '';
   let inForm = false;
   let arr = Object.values(buttons);
@@ -158,7 +163,7 @@ function setMenu(code, isDelitable = 0, isClosed = 0) {
   for(let i = 0; i < code.length; i++) {
     if(code[i] == 0) continue;
     if (i > 3 && !inForm) {
-      menuElems += "<form name = 'redactor'>";
+      menuElems += "<form class='redactMenu' name = 'redactor'>";
       inForm = true;
     };
     menuElems += arr[i];   
@@ -242,6 +247,7 @@ document.onclick = async (e) => {
   let target = e.target;
   let settedButton = '';
 
+
   if (target.id == 'register') authentificate(target);
   if (target.id == 'login') authentificate(target);
   if (target.id == 'logout') {
@@ -253,7 +259,7 @@ document.onclick = async (e) => {
     let requests = await import('/optionsList.js');
     switch(target.id){
      case 'account':
-       requests.getAccountOptions(e);
+       requests.getAccountOptions(target);
        break;
      case 'profile':
        requests.getProfileOptions(e);
@@ -317,20 +323,25 @@ document.onclick = async (e) => {
     let userId = target.dataset.userid;
     let userName = target.dataset.username;
     let userStatus = target.dataset.userstatus;
+    if (userStatus != 'on-line') {
+      let lastComing = new Date(userStatus);
+      userStatus = `Пользователь отсутствует с ${lastComing.getDate()}.${+lastComing.getMonth() + 1}.${lastComing.getFullYear()} г., ${lastComing.getHours()}:${lastComing.getMinutes()}  `; 
+    }
+
     let form = `<div id = 'messager'>
-                          <a id='close'>[x]</a></br>
+                          <div id='close'>X</div>
                           <form name='redactor'>
-                            <div class='userBoard' data-userid='${userId}' data-username='${userName}'> 
+                            <div class='userBoard' data-userid='${userId}' data-username='${userName}'> <span>${userName}<br/>${userStatus}</span>
                               <a href='/profile/${userId}'><input type='button' value = 'профиль'/></a> 
                               <input type='button' id = 'ignore' value = 'игнорировать'/>
                             </div>
                             <div id='PMstream'>
                             </div>Сообщение для ${userName}:<br>
                             <textarea name = 'PMessage'>Привет!</textarea>
-                            <input type ='button' id='sendPM' value = 'Отправить' data-userId = '${userId}'  data-username = '${userName}' data-userstatus = '${userStatus}' data-ismessager = '1' >
+                            <input type ='button' id='sendPM' value = 'Отправить' data-userId = '${userId}'  data-username = '${userName}' data-userstatus = '${target.dataset.userstatus}' data-ismessager = '1' >
                           </form>
                         </div>`;
-    target.insertAdjacentHTML('beforeEnd', form);
+    document.body.insertAdjacentHTML('beforeEnd', form);
     reloadPMstream (userId);
 
     document.getElementById('messager').onmouseover = (e) => {
@@ -395,7 +406,10 @@ document.onclick = async (e) => {
     ajax.send();
     ajax.onload = () => {
       let unreaded = +document.getElementById('messager').parentElement.getElementsByTagName('span')[0].textContent;
-      document.getElementById('inboxlist').removeChild(document.getElementById('messager').parentElement);
+      let sessions = Array.from(document.getElementsByClassName('session') );
+      let ignoredSession = sessions.find(item => item.dataset.userid == userId);
+      document.getElementById('inboxlist').removeChild(ignoredSession);
+      document.body.removeChild(document.getElementById('messager') );
       let allUnreaded = document.getElementById('inbox').getElementsByTagName('span')[0]; 
       allUnreaded.textContent = +allUnreaded.textContent - unreaded;
     };
@@ -538,7 +552,7 @@ document.onclick = async (e) => {
         let theme = document.forms.redactor.elements.title.value;
         let comment = document.forms.redactor.elements.comment.value;
         message = JSON.stringify({
-                                                         topicId: document.getElementsByClassName('topicTitle')[0].id,
+                                                         topicId: target.dataset.topicid,
                                                            theme: theme,
                                                      comment: comment,
                                                            postId: target.id,
@@ -609,6 +623,7 @@ document.onclick = async (e) => {
     };
   };
   if ( e.target.id == 'cancel' ) {
+    if (document.getElementById('sendPost') ) document.getElementById('sendPost').hidden = false;
     isOpened = true;
     let target = e.target;
     while (target != document.body) {
@@ -617,40 +632,12 @@ document.onclick = async (e) => {
     }; 
     if (target == document.body) return;
     hideElems(target.parentElement);
-
-    if ( target.parentElement.classList.contains('post') ) {
-
-      let message = JSON.stringify({id: target.parentElement.id} );
-      ajax.open('DELETE', '/' +path[0] + '/deletePosts');
-      ajax.setRequestHeader("Content-Type", "application/json");
-      ajax.send(message);
-      ajax.onload = ()=> {
-        target.parentElement.classList.remove('deleted');
-        target.parentElement.removeChild( target.parentElement.getElementsByClassName('excluded')[0] );
-        target.innerHTML = '';
-      }
-    }
-      
-    if ( target.parentElement.classList.contains('topic') ) {
-
-      let message = JSON.stringify({id: target.parentElement.id} );
-      ajax.open('DELETE', '/' +path[0] + '/deleteTopics');
-      ajax.setRequestHeader("Content-Type", "application/json");
-      ajax.send(message);
-      ajax.onload = ()=> {
-        target.parentElement.classList.remove('deleted');
-        target.parentElement.removeChild( target.parentElement.getElementsByClassName('excluded')[0] );
-        target.innerHTML = '';
-      }
-    }
-    return;
-    
   };
 
   if (e.target.id == 'moveTopic') {
     isOpened = !isOpened;
     target = e.target.parentElement;
-    target.innerHTML = "<form name='redactor'><select name='forums'></select><input type='button' id = 'changeForum' value='Переместить' /></form>";
+    target.innerHTML = "<form id='changeDestination' name='redactor'><select name='forums'></select><input type='button' id = 'changeForum' value='Переместить' /></form>";
 
     ajax.open('PUT', '/'+ path[0]+'/changeForum')
     ajax.setRequestHeader('Content-Type', 'application/json');
@@ -684,12 +671,18 @@ document.onclick = async (e) => {
     let elems = document.forms.redactor.elements;
     let user = elems.userName.value;
     let password = elems.password.value;
+    let passRepeat = elems.passRepeat.value;
     let mail = elems.mail.value;
     let sex = elems.sex.value;
     let year = +elems.Year.value;
     let month = +elems.Month.value;
     let day = +elems.Day.value;
     let notSelected = elems.notSelected.checked;
+
+    if (!user) return alert("Пожалуйста, укажите имя.");
+    if (!password) return alert("Пожалуйста, укажите пароль.");
+    if (!mail) return alert("Пожалуйста, укажите почту.");
+    if (password != passRepeat) return alert("Пожалуйста, перепроверьте пароль.");
 
     let birthday = (notSelected) ? null : `${year}-${month + 1}-${day}`;
     
@@ -751,6 +744,7 @@ document.onclick = async (e) => {
     let target = sortParentTree(e.target);
     if ( target == document.body ) return;
     if( target.classList.contains('post') ) {
+      document.getElementById('sendPost').hidden = true;
       let st = '';
       let post = target;
       let con = post.getElementsByClassName('content')[0].childNodes;
@@ -786,7 +780,7 @@ document.onclick = async (e) => {
     if( target.classList.contains('forumName') ) {
       hideElems(target);
       let title = target.getElementsByClassName('forumTitle')[0].textContent;
-      target.appendChild(setMenu(720));
+      target.appendChild(setMenu(848));
       document.forms.redactor.elements.title.value = title; 
       document.forms.redactor.elements.forumURN.value = target.dataset.urn;  
     };
@@ -794,7 +788,7 @@ document.onclick = async (e) => {
 
   if (e.target.id == 'sendPost'){
     const poster = document.forms.poster;
-    const messages = document.getElementById('contents');
+  //  const messages = document.getElementById('contents');
     let post = poster.elements.post.value;
     let arr = trans(post);
     let theme = document.getElementsByClassName('theme')[0].textContent;
@@ -914,9 +908,11 @@ function reloadPMstream (userId) {
     let session = '';
     sessionList.forEach( (key) => {
       let isNew = (key.isNew) ? 'new' : '';
+      let sended = new Date(key.postDate);
+      sended = ` Отправлено ${sended.getDate()}.${+sended.getMonth() + 1}.${sended.getFullYear()} в ${sended.getHours()}:${sended.getMinutes()}`;
       if (+key.userId == +userId) session += `<div class='from ${isNew}' `;
       else session += `<div class='me ${isNew}' `;
-      session += `data-pmid='${key.pmId}'><p>${key.userName}${new Date(key.postDate)}</p><p>${key.content}</p></div>`
+      session += `data-pmid='${key.pmId}'><p>${key.userName}. ${sended}</p><p>${key.content}</p></div>`
     });
     document.getElementById('PMstream').innerHTML = session;
   };
@@ -929,15 +925,13 @@ function checkTopics () {
     localStorage.setItem(`${path[0]}_${path[1]}`, posts[posts.length - 1].dataset.postid);  
   }
 
-  let topics = Array.from(document.getElementsByClassName('topic field') );
+  let topics = Array.from(document.getElementsByClassName('topicField') );
   if (topics.length) {
 
     topics.forEach( (item) => {  
-      if (  +localStorage.getItem(`${path[0]}_${item.dataset.topicid}`) >= +item.dataset.lastpost) {
-        item.getElementsByTagName('td')[0].textContent = 'прочитано ' + item.getElementsByTagName('td')[0].textContent;
-      } else {
-        item.getElementsByTagName('td')[0].textContent = 'непрочитано ' + item.getElementsByTagName('td')[0].textContent;    
-      } 
+     if ( localStorage.getItem(`${path[0]}_${item.dataset.topicid}`) && +localStorage.getItem(`${path[0]}_${item.dataset.topicid}`) <= +item.dataset.lastpost) {
+        item.classList.remove('new');
+      }
     });
   }
 }

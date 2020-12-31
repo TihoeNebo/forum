@@ -1,23 +1,23 @@
-﻿export function getAccountOptions(e) {
-  const mail = e.target.dataset.mail;
-  const userId = e.target.dataset.userid;
+﻿export function getAccountOptions(target) {
+  const mail = target.dataset.mail;
+  const userId = target.dataset.userid;
   let template = `<form name='accountOptions'>
     <ul>
     <li > 
-      <fieldset><span>Изменить адрес электронной почты:</span><br>
-        Новый адрес: <input type='text' name = 'mail' value='${mail}' />
-        <input type='button' id = 'changeMail' value='Изменить' />
+      <fieldset>Изменить адрес электронной почты:<br>
+       <span> Новый адрес:</span> <input type='text' name = 'mail' value='${mail}' /><br/>
+       <span></span>   <input type='button' id = 'changeMail' value='Изменить' />
       </fieldset>
     </li>
     <li >
-        <fieldset><span>Изменить пароль: </span><br>
-          Старый пароль: <input type='text' name = 'oldPass' /><br>
-          Новый пароль: <input type='text' name = 'newPass' /><br>
-          Повторить пароль: <input type='text' name = 'repeatPass' /><br>
-          <input type='button' id = 'changePass' value='Изменить' />
+        <fieldset>Изменить пароль: <br>
+          <span>Старый пароль:</span> <input type='password' name = 'oldPass' /><br>
+          <span>Новый пароль:</span> <input type='password' name = 'newPass' /><br>
+          <span>Повторить пароль:</span> <input type='password' name = 'repeatPass' /><br>
+          <span></span>   <input type='button' id = 'changePass' value='Изменить' />
         </fieldset>
     </li>
-    <li id = 'deleteMyAcc' data-userid='${userId}'>Удалить аккаунт</li>
+    <button type='button' id = 'deleteMyAcc' data-userid='${userId}'>Удалить аккаунт</button>
     </ul>
     </form>`;
   document.getElementById('optionBoard').innerHTML = template;
@@ -69,9 +69,9 @@ export async function getProfileOptions(e) {
     <ul>
       <form name='profileOptions'>
       <li > 
-        <fieldset><span>Изменить имя пользователя:</span><br>
-          Новое имя: <input type='text' name = 'userName' value='${userName}' />
-          <input type='button' id = 'changeName' value='Изменить' />
+        <fieldset>Изменить имя пользователя:<br>
+          <span>Новое имя: </span><input type='text' name = 'userName' value='${userName}' /><br/>
+          <span></span><input type='button' id = 'changeName' value='Изменить' />
         </fieldset>
       </li>
       <li>     
@@ -79,16 +79,16 @@ export async function getProfileOptions(e) {
           <label><input type='radio' name='sex' value='1' />М</label><br />
           <label><input type='radio' name='sex' value='2' />Ж</label><br />
           <label><input type='radio' name='sex' value='0' />не указан</label><br />
-          <input type='button' id = 'changeSex' value='Изменить' />
+          <span></span><input type='button' id = 'changeSex' value='Изменить' />
         </fieldset>
       </li>
       </form>
       <li>
         <form name = 'redactor'>
-          <fieldset> Сменить дату рождения:<br>
+          <fieldset> Сменить дату рождения:<br><br>
             <select name='Year'></select><select name='Month'></select><select name='Day'></select><br />
-            <label><input type = 'checkbox' name='notSelected' value='true'>  не указывать дату.</label>
-          <input type='button' id = 'changeBirthday' value='Изменить' />
+            <label><input type = 'checkbox' name='notSelected' value='true'>  не указывать дату.</label><br/>
+            <span></span><input type='button' id = 'changeBirthday' value='Изменить' />
           </fieldset>
         </form>
       </li>
@@ -179,7 +179,7 @@ export function getSubscribeOptions(e) {
     let subsTemplate = `<div id = 'subscribeList'>`;
     subsList.forEach( (item) => {
     
-      subsTemplate += `<div><a href='/${item['forumURN']}/${item.topicId}'>${item.theme}</a><br>${item.comment}
+      subsTemplate += `<div class='me'><a href='/${item['forumURN']}/${item.topicId}'>${item.theme}</a><br>${item.comment}
         <input type='button' class='deleteSub' data-forum='${item.forumURN}' data-topic='${item.topicId}' value='Отписаться' /></div>`;
     });
     subsTemplate +=`</div>`;
@@ -227,7 +227,7 @@ export function getBlackListOptions() {
     if (!ignorList.length) return  document.forms.blackListOptions.insertAdjacentHTML('beforeEnd',`<div id = 'ignorList'>пусто</div>`);
     let template = `<div id = 'ignorList'>`;
     ignorList.forEach( (item) => {
-      template += `<div><a href='/profile/${item.userId}'>${item.userName}</a>
+      template += `<div class='from'><a href='/profile/${item.userId}'>${item.userName}</a>
         <input type='button' class='forgive' data-userid='${item.userId}' value='Понять, простить..' /></div>`;
     });
     template +=`</div>`;

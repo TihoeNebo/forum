@@ -1,18 +1,21 @@
-﻿Разделы:
+﻿<h2>Разделы:</h2>
 
-  <div>
+  <table>
     {{#dislocateParts forums}}
-        <tr>
-          <td class='forumName' id='{{this.forumId}}' data-urn = '{{this.forumURN}}' {{#if this.redactable}}data-redactable='true' data-deletable='true'{{/if}}>
+        <div class="forumField">
+          <div class="forumParams">Последнее сообщение в теме: <a href="/{{this.forumURN}}/{{this.topicId}}?p={{ceil this.lastPage}}#{{this.lastPostId}}">{{this.theme}}</a><br/> Автор: <a href = '/profile/{{this.userId}}'>{{this.userName}}</a><br/>
+            {{getDate this.lastPostDate}}
+          </div>
+          <div class='forumName' id='{{this.forumId}}' data-urn = '{{this.forumURN}}' {{#if this.redactable}}data-redactable='true' data-deletable='true'{{/if}}>
             <a href="/{{this.forumURN}}" class="forumTitle">{{this.forumName}}</a> <br />
-            {{this.comment}}
-          </td>
-          <td>{{this.sumTopics}}</td>
-          <td>{{this.sumPosts}}</td>
-          <td><a href="/{{this.forumURN}}/{{this.topicId}}?p={{ceil this.lastPage}}#{{this.lastPostId}}">смотреть</a> Автор: <a href = '/profile/{{this.userId}}'>{{this.userName}}</a> <br />{{getDate this.lastPostDate}}</td>
-        </tr>
+            {{this.comment}} 
+            Количество тем: {{this.sumTopics}}. <br />
+            Всего сообщений: {{this.sumPosts}}.
+          </div>
+
+        </div>
      {{/dislocateParts}}
     </table>
-  </div>
 
-{{#if createForumButton}}<a href='/createForum'>Создать форум</a>{{/if}}
+
+{{#if createForumButton}}<a href='/createForum'><button type='button'>Создать форум</button></a>{{/if}}

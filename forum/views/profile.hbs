@@ -1,9 +1,15 @@
 ﻿<h2>{{sayHello user.sex}} {{user.userName}}.</h2>
 {{#if isDeleted}} Пользователь удален.<br>{{else}}
+<div class='profile'>
+ {{#if isLogin}} <div id="userData">{{/if}}
+    {{#if isLive}}on-line{{else}}{{lastComing}}{{/if}}<br>
+    Пол: {{getSex user.sex}}.<br>
+    Дата рождения: {{#if user.birthday}}{{user.birthday}}{{else}}не указана{{/if}}.<br>
+ {{#if isLogin}} </div>{{/if}}
 {{#if isLogin}}
   <div class='userBoard' data-userid='{{user.userId}}' data-userName='{{user.userName}}' data-userstatus='{{#if isLive}}on-line{{else}}{{lastComing}}{{/if}}'>
-    <input type='button' class = 'pm' value = 'написать лично'/>
-    {{#if isMaster}}{{#if isUnder}}{{#if user.banned}}<input type='button' class = 'disban' value = 'разбанить'/>{{else}}<div><input type='button' class = 'ban' value = 'забанить' onclick='document.forms.banForm.hidden = !document.forms.banForm.hidden;'/><form name='banForm' hidden='1'>
+    <button class = 'pm'>Написать лично</button>
+    {{#if isMaster}}{{#if isUnder}}{{#if user.banned}}<button class = 'disban'>разбанить'</button>{{else}}<button class = 'ban' onclick='document.forms.banForm.hidden = !document.forms.banForm.hidden;'>Забанить</button><form name='banForm' hidden='1'>
       <input type='button' class = 'changePeriod' value = '+ 15 мин.' data-time='mins'/>
       <input type='button' class = 'changePeriod' value = '+ 1 час' data-time='hour'/>
       <input type='button' class = 'changePeriod' value = '+ 1 день' data-time='day'/>
@@ -12,13 +18,12 @@
         <div id='banPeriod'></div>
         <input type='button' id = 'sendBan' data-userid = '{{user.userId}}' value = 'ОК' onclick="document.forms.banForm.hidden = 1"/>
       </fieldset>
-    </form></div>{{/if}}{{/if}}{{/if}}
-    {{#if isLord}}<input type='button' data-userid = '{{user.userId}}' data-moderights = '{{#if isModerator}}1{{else}}0{{/if}}' id = 'moderating' value ='{{#if isModerator}}Забрать {{else}}Дать {{/if}}полномочия модератора' />{{/if}}
-    {{#if isLord}}<input type='button' data-userid = '{{user.userId}}' id = 'deleteUser' value = 'Удалить пользователя' />{{/if}}
+    </form>{{/if}}{{/if}}{{/if}}
+    {{#if isLord}}<button data-userid = '{{user.userId}}' data-moderights = '{{#if isModerator}}1{{else}}0{{/if}}' id = 'moderating'>{{#if isModerator}}Забрать {{else}}Дать {{/if}}полномочия модератора</button>{{/if}}
+    {{#if isLord}}<button data-userid = '{{user.userId}}' id = 'deleteUser'>Удалить пользователя</button>{{/if}}
   </div>
 {{/if}}
-{{#if isLive}}on-line{{else}}{{lastComing}}{{/if}}<br>
-Пол: {{getSex user.sex}}.<br>
-Дата рождения: {{#if user.birthday}}{{user.birthday}}{{else}}не указана{{/if}}.<br>
+</div>
 {{/if}}
+
 <a href = '{{referer}}'> << обратно к прошлой странице</a>

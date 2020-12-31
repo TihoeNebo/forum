@@ -1,24 +1,24 @@
-﻿export const regList = `<form name='redactor'>
-<a id='close'>[x]</a></br>
+﻿export const regList = `<form class='registration' name='redactor'>
+<div id='close'>X</div>
+  <h4>Регистрация</h4>
 <fieldset name='anketa'>
-  <legend>Регистрация.</legend>
-  Придумайте ник:
+  <span>Придумайте ник:</span>
   <input type='text' name='userName' /><br />
-  Ваш e-mail:
+  <span>Ваш e-mail:</span>
   <input type='text' name='mail' /><br />
-  Пароль:
-  <input type='text' name='password' /><br />
-  Повторите пароль:
-  <input type='text' name='passRepeat' /><br />
-  Пол:<br />
+  <span>Пароль:</span>
+  <input type='password' name='password' /><br />
+  <span>Повторите пароль:</span>
+  <input type='password' name='passRepeat' /><br />
+  <span>Пол:</span><br/>
   <label><input type='radio' name='sex' value='1'/>М</label><br />
   <label><input type='radio' name='sex' value='2'/>Ж</label><br />
   <label><input type='radio' name='sex' value='0' checked />не указан</label><br />
-  <fieldset> Дата рождения:
+  <fieldset> <span>Дата рождения:</span>
   <select name='Year'></select><select name='Month'></select><select name='Day'></select><br />
   <label><input type = 'checkbox' name='notSelected' value='true'>  не указывать дату.</label>
 </fieldset></fieldset>
-<input type='button' name='addUser' id = 'addUser' value='Зарегистрироваться' /><br />
+<button name='addUser' id = 'addUser' type='button'>Зарегистрироваться</button>
 </form>`;
 
 export function selectBirthDay() {
@@ -85,16 +85,16 @@ function changeDate() {
     selectDate.appendChild(option);
   }   
 }
-export const loginList = `<form name='redactor'>
-<a id='close'>[x]</a></br>
-<fieldset>
-  <legend>Вход</legend>
-  E-mail:
-  <input type='text' name='userName' /><br />
-  Пароль:
-  <input type='text' name='password' /><br />
-</fieldset>
-  <label><input type = 'checkbox' name='rememberMe' value='1'>  запомнить меня.</label>
+export const loginList = `<form  class='login' name='redactor'>
+<div id='close'>X</div>
 
-<input type='button' name='checkUser' id = 'checkUser' value='Войти' /><br />
+  <h4>Вход</h4>
+ <span> E-mail: </span>
+  <input class = 'textLine' type='text' name='userName' /><br />
+ <span> Пароль: </span>
+  <input class = 'textLine' type='password' name='password' /><br />
+
+  <label><input type = 'checkbox' name='rememberMe' value='1'>  запомнить меня.</label><br/><br/>
+
+<button name='checkUser' id = 'checkUser' type='button'>Войти</button>
 </form>`;

@@ -1,25 +1,25 @@
-﻿<p>Здравствуйте, {{sayHello userProfile.sex}} {{userProfile.userName}}</p>
+﻿
+<p>Здравствуйте, {{sayHello userProfile.sex}} {{userProfile.userName}}</p>
 {{#if userProfile.isConfurmed}}
   {{else}}Регистрация не завершена. Пожалуйста, проверьте, верно ли указан адрес электронной почты:
     <form name='mail'><input type='text' name='newAdress' /><input type='button' id='sendRegLetter' value='отправить письмо'></form>
 {{/if}}
-<div id='options' onclick='window.location.replace("/me")'>Настройки</div>
-<div id ='inbox'> Сообщения(<span>{{#if unopened}}{{unopened}}{{else}}0{{/if}}</span>)
-  <div id ='inboxlist' hidden ='1'>
-
-  {{#each inbox}}
-    {{#if this.ignored}}{{else}}<div class = 'session' data-userId = '{{this.userId}}' data-username='{{this.userName}}' data-userstatus='{{#if this.isLive}}on-line{{else}}{{this.lastComing}}{{/if}}'>{{this.userName}}(<span>{{this.newMessages}}</span>)<br><span>{{#if this.isLive}}on-line{{else}}{{this.lastComing}}{{/if}}</span></div>{{/if}}
-  {{/each}}
-
-
-  </div>
-</div>
-<div id = 'notifies' onclick='document.getElementById("notifiesList").hidden = !document.getElementById("notifiesList").hidden'> Уведомления(<span>{{notifiesCount}}</span>)
-  <div id = 'notifiesList' hidden='1'>
-    {{#each notifies}}
-       <div class = 'notify' onclick='window.location.replace("/{{this.forumURN}}/{{this.topicId}}")'>В теме <a href='/{{this.forumURN}}/{{this.topicId}}'>{{this.theme}}</a> появилось новое сообщение!</div>
+  
+  <div class='userMenu' id='options' onclick='window.location.replace("/me")'>Настройки</div>
+  <div class='userMenu' id ='inbox'> Сообщения(<span>{{#if unopened}}{{unopened}}{{else}}0{{/if}}</span>)
+    <div id ='inboxlist' hidden ='1'>
+    {{#each inbox}}
+      {{#if this.ignored}}{{else}}<div class = 'session' data-userId = '{{this.userId}}' data-username='{{this.userName}}' data-userstatus='{{#if this.isLive}}on-line{{else}}{{this.lastComing}}{{/if}}'>{{this.userName}}(<span>{{this.newMessages}}</span>)<br><span>{{#if this.isLive}}on-line{{else}}Был здесь {{getThisTime this.lastComing}}{{/if}}</span></div>{{/if}}
     {{/each}}
+    </div>
   </div>
-</div>
-<a id='logout'>Выход</a>
+  <div class='userMenu' id = 'notifies' onclick='document.getElementById("notifiesList").hidden = !document.getElementById("notifiesList").hidden'> Уведомления(<span>{{notifiesCount}}</span>)
+    <div id = 'notifiesList' hidden='1'>
+      {{#each notifies}}
+         <div class = 'notify' onclick='window.location.replace("/{{this.forumURN}}/{{this.topicId}}")'>В теме <a href='/{{this.forumURN}}/{{this.topicId}}'>{{this.theme}}</a> появилось новое сообщение!</div>
+      {{/each}}
+    </div>
+  </div>
+  <div  class='userMenu' id='logout'>Выход</div>
+
 {{#if userProfile.banned}}<div id = 'banTimer' data-banperiod='{{userProfile.banned}}'></div>{{/if}}

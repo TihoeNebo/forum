@@ -1,21 +1,27 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link href="/reset.css" rel='stylesheet'>
+  <link href="/style.css" rel='stylesheet'>
   <script type="module" src="/script.js" async></script>
-
+  <title>{{title}}</title>
 </head>
 <body>
 <header>
+<div id='titlebar' onclick="window.location.replace('/')"><h1>Тихое Небо</h1><p>Добро пожаловать!</p></div>
 {{#if isLogin}}{{> logined}}
   {{else}}
-  <a id='register'>Зарегистрироваться</a></br>
-  <a id='login'>Войти</a>
+  <div class='options' id='register'>Зарегистрироваться</div>
+  <div class='options' id='login'>Войти</div>
 {{/if}}<br>
-
 </header>
-
+<div class='main'>
 {{{body}}}
+</div>
 <footer>
+<p>Сейчас на сайте <span id='users'>{{onlineCount}}</span> пользователей, среди которых <span id='guests'>{{guests}}</span> гостей.</p>
+<p>Присутствующие здесь:</p>
 {{#each online}}
 <a href='/profile/{{this.userId}}' data-userid='{{this.userId}}'>{{this.userName}}</a>
 {{/each}}

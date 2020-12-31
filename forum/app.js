@@ -10,8 +10,10 @@ const Emitter = require("events");
 
 
 const salt = 'ghio9jf23v959blljiucds7ettrd6srechg47oouiuk8';
+const title = ' форумы "Тихое Небо" ';
 const jpars = pars.json();
 const app = express();
+const router = express.Router();
 
 let emitter = new Emitter();
 
@@ -132,11 +134,13 @@ class EntriesData {
     this.notifies = visiters.get(req.cookies['tempId']).notifies;
     this.notifiesCount = (visiters.get(req.cookies['tempId']).notifies) ? visiters.get(req.cookies['tempId']).notifies.length : 0; 
     this.unopened =  0;
+    this.guests = 0;
     this.isLogin = (visiters.get(req.cookies['tempId']).access > 0);
     this.isMaster = (visiters.get(req.cookies['tempId']).access > 2);
     this.isLord = (visiters.get(req.cookies['tempId']).access > 3);
     this.userProfile = visiters.get(req.cookies['tempId']).profile;
-    this.online =  allWhoAlive();
+    this.online = allWhoAlive();
+    this.onlineCount = visiters.size;
     this.inbox = Array.from(visiters.get(req.cookies['tempId']).inbox);
     if (visiters.get(req.cookies['tempId']).inbox.length) {
       visiters.get(req.cookies['tempId']).inbox.forEach( (key) => {
@@ -144,10 +148,11 @@ class EntriesData {
       });
     }
     isLiveChecking (this.inbox, this.online);
+    for (let visiter of visiters.values() ) {
+      if (visiter.access == 0) this.guests++;
+    }
   }
 }
-
-
 
 app.engine("hbs", exphbs(
     {
@@ -190,6 +195,10 @@ app.engine("hbs", exphbs(
                      case 0:
                        return 'неизвестно';
                    }
+                 },
+                 getThisTime: function(time) {
+                   time = new Date(time);
+                   return `${time.getDate()}.${+time.getMonth() + 1}.${time.getFullYear()} в ${time.getHours()}:${time.getMinutes()}`;
                  }
                }
       }
@@ -205,7 +214,6 @@ const connection = mysql.createConnection({
 }).promise();
 
 createRoot();
-getForumNames();
 
 console.log('Подключено');
 
@@ -216,9 +224,11 @@ app.use(cookiePars());
 app.use("/script.js", express.static(__dirname + "/script.js"));
 app.use("/regList.js", express.static(__dirname + "/regList.js"));
 app.use("/optionsList.js", express.static(__dirname + "/optionsList.js"));
-app.use("/favicon.ico", () => {return;});
+app.use("/style.css", express.static(__dirname + "/style.css"));
+app.use("/reset.css", express.static(__dirname + "/reset.css"));
+app.use("/favicon.ico", express.static(__dirname + "/favicon.ico"));
 
-
+//===========================================
 //...........................................SSE...............................................................................
 
 
@@ -241,12 +251,10 @@ app.get("/pulse", async function (req, res) {
   });
 
   visiters.get(req.cookies['tempId']).on('newPM', (data)=> {
-    res.write(`event: newPM\ndata: ${JSON.stringify({fromId: data.fromId, 
-                                                                                                fromName: data.fromName})} \n\n`);
+    res.write(`event: newPM\ndata: ${JSON.stringify({fromId: data.fromId, fromName: data.fromName})} \n\n`);
   });
   visiters.get(req.cookies['tempId']).on('readedPM', (data)=> {
-    res.write(`event: readedPM\ndata: ${JSON.stringify({fromId: data.fromId, 
-                                                                                                     pmId: data.pmId})} \n\n`);
+    res.write(`event: readedPM\ndata: ${JSON.stringify({fromId: data.fromId, pmId: data.pmId})} \n\n`);
   });
   visiters.get(req.cookies['tempId']).on('logout', (data)=> {
     res.write(`event: logout\ndata: ${JSON.stringify({ userId: data.userId, lastComing: data.lastComing })} \n\n`);
@@ -263,7 +271,6 @@ app.get("/pulse", async function (req, res) {
 });
 
 app.get("/online", function(req, res) {
-//console.log('online ' + req.cookies['tempId']);
   if ( visiters.has(req.cookies['tempId']))  visiters.get(req.cookies['tempId']).isOnline();
 });
 
@@ -295,7 +302,7 @@ app.use( async function(req, res, next) {
 });
 
 app.use( async function(req, res, next) {
-//  if (req.method != 'GET') return next();
+  if (req.method != 'GET') return next();
   let visiter = visiters.get(req.cookies['tempId']);
   if (visiter.access < 2) return next();
   if (visiters.get(req.cookies['tempId']).drop.posts) {
@@ -325,9 +332,6 @@ app.post("/register", jpars, async function(req, res) {
   await connection.query(`insert into users(pass, mail, access, registered) values('${hash}', '${req.body.mail}',1, now())`)
   .then( ([res])=> {userId = res.insertId;} )
   .catch( err => {console.log(err);});
-  //let [userId] =  await connection.query(`select userId from users where mail = '${req.body.mail}'`).catch( err => {console.log(err);});
- // userId = userId[0].userId;
-console.log(userId);
   await connection.query(`insert into userProfiles(userId, userName, sex, subscribes, birthday) values(${userId}, '${req.body.login}', ${req.body.sex}, '[]', ?)`, [req.body.birthday])
     .catch( err => {console.log(err);});
 
@@ -338,7 +342,7 @@ console.log(userId);
     primary key(userId)) default charset = utf8`).catch( (err) => {console.log(err);});
 
   sendRegLetter(req.body.mail, req.body.login);
-  res.send('');
+  res.send();
 });
 
 app.post('/login', jpars, async function(req, res) {
@@ -487,7 +491,7 @@ console.log(req.query.userId);
 
 app.get('/logout', function(req, res) {
 
-  if (visiters.get(req.cookies['tempId']).access == 0) return;
+  if (visiters.get(req.cookies['tempId']).access == 0) return res.redirect("/");
 console.log(visiters.get(req.cookies['tempId']).notifies);
   let subscribes = JSON.stringify( visiters.get(req.cookies['tempId']).subscribes );
   let date = new Date();
@@ -509,21 +513,22 @@ console.log(visiters.get(req.cookies['tempId']).notifies);
   res.redirect('/');
 });
 
-app.get("/me", function (req, res) {
+router.get("/", function (req, res) {
   if (!visiters.get(req.cookies['tempId']).access) return res.redirect('/');
   res.render('me', {
+                                  title: "Настройки аккаунта -" + title,
                                   mail: visiters.get(req.cookies['tempId']).mail,
                                   referer: req.headers.referer,
                                   __proto__: new EntriesData(req)
   });
 });
 
-app.get("/me/getSubscribes", jpars, (req, res) => {
+router.get("/getSubscribes", jpars, (req, res) => {
   if (!visiters.get(req.cookies['tempId']).access) return;
   res.json(visiters.get(req.cookies['tempId']).subscribes);
 });
 
-app.get("/me/getIgnored", jpars, (req, res) => {
+router.get("/getIgnored", jpars, (req, res) => {
   let ignoreList = [];
   visiters.get(req.cookies['tempId']).inbox.forEach( (user) => {
     if (user.ignored) ignoreList.push(user);
@@ -531,7 +536,7 @@ app.get("/me/getIgnored", jpars, (req, res) => {
   res.send(ignoreList);
 });
 
-app.delete("/me/delSubscribes", (req, res) => {
+router.delete("/delSubscribes", (req, res) => {
 
   let i = visiters.get(req.cookies['tempId']).subscribes.findIndex(item =>
     +item.topicId == +req.query.topicId && item.forumURN == req.query.forum);
@@ -542,19 +547,17 @@ app.delete("/me/delSubscribes", (req, res) => {
   
 });
 
-app.put("/me/forgive", (req, res) => {
+router.put("/forgive", (req, res) => {
   let userId = +req.query.userId;
   let ignoredUser = visiters.get(req.cookies['tempId']).inbox.find( item => +item.userId == userId);
   ignoredUser.ignored = 0;
   return res.sendStatus(200);
 });
 
-app.put("/me/changePass", jpars, async function(req, res) {
+router.put("/changePass", jpars, async function(req, res) {
   let userId = visiters.get(req.cookies['tempId']).userId;
   let oldPass = hashPass(req.body.oldPass);
   let myPass = visiters.get(req.cookies['tempId']).pass;
-//  let [isMyPass] = await connection.query(`select mail from users where userId=${userId} and pass='${oldPass}'`)
-  // .catch( (err) => {console.log(err);});
   if (oldPass != myPass) return res.sendStatus(504);
   let newPass = hashPass(req.body.newPass);
   connection.query(`update users set pass = '${newPass}' where userId = ${userId}`)
@@ -562,7 +565,7 @@ app.put("/me/changePass", jpars, async function(req, res) {
    .catch( (err) => {return res.sendStatus(504);});
 });
 
-app.put("/me/changeMail", jpars, function(req, res) {
+router.put("/changeMail", jpars, function(req, res) {
   let userId =visiters.get(req.cookies['tempId']).userId;
   let newMail = req.body.newMail;
   connection.query(`update users set mail = '${newMail}' where userId = ${userId}`)
@@ -570,7 +573,7 @@ app.put("/me/changeMail", jpars, function(req, res) {
    .catch( (err) => { return res.sendStatus(504); });
 });
 
-app.put("/me/changeName", function(req, res) {
+router.put("/changeName", function(req, res) {
   let userId =visiters.get(req.cookies['tempId']).userId;
   let newName = req.query.newName;
   visiters.get(req.cookies['tempId']).profile.userName = newName;
@@ -579,7 +582,7 @@ app.put("/me/changeName", function(req, res) {
    .catch( (err) => { return res.sendStatus(504); });
 });
 
-app.put("/me/changeSex", function(req, res) {
+router.put("/changeSex", function(req, res) {
   let userId =visiters.get(req.cookies['tempId']).userId;
   let newSex = +req.query.newSex;
   visiters.get(req.cookies['tempId']).profile.sex = newSex;
@@ -588,7 +591,7 @@ app.put("/me/changeSex", function(req, res) {
    .catch( (err) => { return res.sendStatus(504); });
 });
 
-app.put("/me/changeBirth", function(req, res) {
+router.put("/changeBirth", function(req, res) {
   let userId =visiters.get(req.cookies['tempId']).userId;
   let newBirth = req.query.newBirth;
   console.log(newBirth);
@@ -598,7 +601,7 @@ app.put("/me/changeBirth", function(req, res) {
    .catch( (err) => { return res.sendStatus(504); });
 });
 
-app.put("/me/changeSubMode", function(req, res) {
+router.put("/changeSubMode", function(req, res) {
   let mode = +req.query.mode;
   let userId = visiters.get(req.cookies['tempId']).userId;
   visiters.get(req.cookies['tempId']).profile.subMode = mode;
@@ -606,10 +609,9 @@ app.put("/me/changeSubMode", function(req, res) {
    .then( () =>{  return res.sendStatus(200); })  
    .catch( (err) => { return res.sendStatus(504); });    
 });
-//=================GET==================
 
-app.get("/registration", function (req, res) {
-  res.render('reg');});
+app.use("/me", router);
+//=================GET==================
 
 app.get("/createForum", async function (req, res) {
 
@@ -618,6 +620,7 @@ app.get("/createForum", async function (req, res) {
 
   if (visiters.get(req.cookies['tempId']).access != 4) res.send('У вас нет доступа.');
   res.render("createForum", {
+                                                    title: "Создать форум -" + title,
                                                     __proto__: new EntriesData(req),
                                                     parts: parts
                                                    });
@@ -626,6 +629,7 @@ app.get("/createForum", async function (req, res) {
 
 app.get("/:forumURN/createTopic", jpars, function(req, res) {
  if (visiters.get(req.cookies['tempId']).access > 1) res.render("createTopic", {
+                                                                                              title: "Создать тему -" + title,
                                                                                               __proto__: new EntriesData(req)
                                                                                              });
    else res.send('У вас нет доступа.')
@@ -644,6 +648,7 @@ app.get("/profile/:userId", async function (req, res) {
   });
 
   res.render("profile", {
+                                           title: `Профиль: ${profile[0].userName} -` + title,
                                            user: profile[0],
                                            isDeleted: (!user.length),
                                            isUnder: (user.length && visiters.get(req.cookies['tempId']).access > user[0].access ),
@@ -704,6 +709,7 @@ app.get("/:forumURN/:topicId", async function (req, res) {
     visiters.get(req.cookies['tempId']).notifies = sortedNotifies;
   }
   res.render("poster", {
+                                       title: `Тема "${names[0].theme}" -` + title,
                                        messages: pageMessages,
                                        pages: getPages(+postSum.length, +req.query.p, req.params.forumURN, req.params.topicId),
                                        params: req.params,
@@ -752,6 +758,7 @@ app.get("/:forumURN", async function (req, res) {
   }
 
   return res.render("topiclist", { 
+                                     title: `Форум "${names[0].forumName}" -` + title,
                                      topics: pageTopics,
                                      exist: exist,
                                      pages: getPages(+topicSum.length, +req.query.p, req.params.forumURN),
@@ -768,7 +775,7 @@ app.get("/", async function (req, res) {
 
   let createForumButton = false;
   const joinTable = `select forums.forumName, forums.forumURN, parts.partName, parts.partId, 
-    forumlist.forumId, forumlist.topicId, forumlist.sumPosts as lastPage, sum(forumlist.sumTopics) as sumTopics, 
+    forumlist.forumId, forumlist.topicId, forumlist.theme, forumlist.sumPosts as lastPage, sum(forumlist.sumTopics) as sumTopics, 
     sum(forumlist.sumPosts) as sumPosts, forumlist.lastPostId, forumlist.lastPostDate, forumlist.userName, forumlist.userId
     from forumlist 
     right join forums on forums.forumId = forumlist.forumId 
@@ -784,6 +791,7 @@ app.get("/", async function (req, res) {
   if (!forums.length) { 
     if (visiters.get(req.cookies['tempId']).access == 4) createForumButton = true;
     return res.render("emptylist", { 
+                                                            title: title,
                                                             createForumButton: createForumButton,
                                                              __proto__: new EntriesData(req)
                                                           });
@@ -791,7 +799,7 @@ app.get("/", async function (req, res) {
 
   function select(name) {
     return ` select topic.*, user.userName, user.userId from (select ${name}_topics.forumId,  
-      ${name}_topics.topicId, count(distinct ${name}_topics.topicId) as sumTopics,
+      ${name}_topics.topicId, ${name}_topics.theme, count(distinct ${name}_topics.topicId) as sumTopics,
       count( ${name}_posts.postId) as sumPosts, 
       max(${name}_posts.postId) as lastPostId, max(${name}_posts.postDate) as lastPostDate
       from ${name}_topics
@@ -825,7 +833,7 @@ app.get("/", async function (req, res) {
   }
 
   return res.render("forumlist", { 
-
+                                                            title: title,
                                                             forums: pageForums,
                                                             createForumButton: createForumButton,
                                                              __proto__: new EntriesData(req)
@@ -1028,7 +1036,7 @@ app.post("/getSession", jpars, async function(req, res) {
     return;
   }
 
-  let [message] = await connection.query(`select session_${user1}_${user2}_.*, userProfiles.userName from session_${user1}_${user2}_ join userProfiles on session_${user1}_${user2}_.userId = userProfiles.userId`)
+  let [message] = await connection.query(`select session_${user1}_${user2}_.*, userProfiles.userName from session_${user1}_${user2}_ join userProfiles on session_${user1}_${user2}_.userId = userProfiles.userId order by pmId`)
     .catch( (err) => {console.log(err);
                                     return res.sendStatus(504); });
   return res.json(message);
@@ -1284,16 +1292,16 @@ function dislocateParts (context, options) {
   let dataRedactable = (context[0].redactable) ? " data-redactable = 'true' ": "";
   for (let i = 0; i< context.length; i++) {
     if (context[i].partId != previousPart) {
-      if (previousPart != 0) matrix += "</table></div>";
-      matrix += "<div class='part' > Раздел: <div class='partName' id = '" + context[i].partId + 
-        "' " + dataRedactable + "><h3 class='partTitle'>" + context[i].partName + 
-        "</h3></div><table border='1'><tr><td>Форум:</td><td>кол-во тем:</td><td>кол-во сообщений:</td><td>Последнее сообщение:</td></tr>" + options.fn(context[i]);
+      if (previousPart != 0) matrix += "</div>";
+      matrix += "<div class='part' ><div class='partName' id = '" + context[i].partId + 
+        "' " + dataRedactable + "> Раздел:<br/><h3 class='partTitle'>" + context[i].partName + 
+        "</h3></div>" + options.fn(context[i]);
     } else {
       matrix += options.fn(context[i]);
     };
     previousPart = context[i].partId;
   };
-  return matrix + "</table></div>";
+  return matrix + "</div>";
 }
     
 function getPages(n, p, forumURN, topicId) {
@@ -1461,7 +1469,7 @@ function allWhoAlive  (){
  let list = [];
  let i = 0;
  for (let value of visiters.values()){
-   list[i++] = value.profile;
+   if (value.access) list[i++] = value.profile;
  }
  return list;  
 }
