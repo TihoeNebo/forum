@@ -13,7 +13,7 @@
     {{/each}}
     </div>
   </div>
-  <div class='userMenu' id = 'notifies' onclick='document.getElementById("notifiesList").hidden = !document.getElementById("notifiesList").hidden'> Уведомления(<span>{{notifiesCount}}</span>)
+  <div class='userMenu' id = 'notifies'> Уведомления(<span>{{notifiesCount}}</span>)
     <div id = 'notifiesList' hidden='1'>
       {{#each notifies}}
          <div class = 'notify' onclick='window.location.replace("/{{this.forumURN}}/{{this.topicId}}")'>В теме <a href='/{{this.forumURN}}/{{this.topicId}}'>{{this.theme}}</a> появилось новое сообщение!</div>
