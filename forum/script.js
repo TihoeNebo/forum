@@ -226,6 +226,8 @@ document.onclick = async (e) => {
   let target = e.target;
   let settedButton = '';
 
+  if (document.getElementById('inbox') && (target.id != 'inbox' || target.id != 'inboxlist') ) document.getElementById('inboxlist').hidden = true;
+  if (document.getElementById('notifies') && (target.id != 'notifies' || target.id != 'notifiesList') ) document.getElementById('notifiesList').hidden = true;
 
   if (target.id == 'register') authentificate(target);
   if (target.id == 'login') authentificate(target);
@@ -374,8 +376,14 @@ document.onclick = async (e) => {
     }
   };
 
-  if (target.id == 'inbox') {
+  if (target.id == 'inbox' && document.getElementById('inboxlist').children.length) {
+    
     document.getElementById('inboxlist').hidden = !document.getElementById('inboxlist').hidden;
+  };
+
+  if (target.id == 'notifies' && document.getElementById('notifiesList').children.length) {
+    
+    document.getElementById('notifiesList').hidden = !document.getElementById('notifiesList').hidden;
   };
 
   if (target.id == 'ignore') {
