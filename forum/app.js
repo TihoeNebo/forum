@@ -278,10 +278,6 @@ app.get("/online", function(req, res) {
 
 app.use( async function(req, res, next) {
 
- console.log(req.path);
- console.log('запрос из:');
- console.log(req.headers.referer);
- console.log(bannedUsers);
   if (visiters.size == 0) p = 0;
   if ( !visiters.has(req.cookies['tempId'])) {
     let date = new Date();
@@ -353,7 +349,6 @@ app.post('/login', jpars, async function(req, res) {
     res.cookie('mail', req.body.mail);
     res.cookie('pass', req.body.pass); 
   }   
- console.log(visiters.get(req.cookies['tempId']).profile.userName);
   return res.sendStatus(200);
 });
 
@@ -377,7 +372,6 @@ app.get('/confirm', async function(req, res) {
 
 app.post( '/banUser', jpars, function (req, res) {
   if (visiters.get(req.cookies['tempId']).access < 3) return;
-console.log(req.body);
 
   if (req.body.userId) {
 
@@ -408,7 +402,7 @@ app.get( '/reabilitate', function (req, res) {
   if (!bannedUsers.length) return res.sendStatus(504);
 
   if (req.query.userId && visiters.get(req.cookies['tempId']).access > 2) {
-console.log('ll')
+
     let user = bannedUsers.find(item => +item.userId == +req.query.userId);
     user.banned = new Date(0);
   }
@@ -516,10 +510,10 @@ console.log(visiters.get(req.cookies['tempId']).notifies);
 router.get("/", function (req, res) {
   if (!visiters.get(req.cookies['tempId']).access) return res.redirect('/');
   res.render('me', {
-                                  title: "Настройки аккаунта -" + title,
-                                  mail: visiters.get(req.cookies['tempId']).mail,
-                                  referer: req.headers.referer,
-                                  __proto__: new EntriesData(req)
+                    title: "Настройки аккаунта -" + title,
+                    mail: visiters.get(req.cookies['tempId']).mail,
+                    referer: req.headers.referer,
+                    __proto__: new EntriesData(req)
   });
 });
 
@@ -540,9 +534,7 @@ router.delete("/delSubscribes", (req, res) => {
 
   let i = visiters.get(req.cookies['tempId']).subscribes.findIndex(item =>
     +item.topicId == +req.query.topicId && item.forumURN == req.query.forum);
- console.log(i);
   visiters.get(req.cookies['tempId']).subscribes.splice(i, 1);
- console.log(visiters.get(req.cookies['tempId']).subscribes.splice(i, 1));
   res.sendStatus(200);
   
 });
@@ -620,18 +612,18 @@ app.get("/createForum", async function (req, res) {
 
   if (visiters.get(req.cookies['tempId']).access != 4) res.send('У вас нет доступа.');
   res.render("createForum", {
-                                                    title: "Создать форум -" + title,
-                                                    __proto__: new EntriesData(req),
-                                                    parts: parts
-                                                   });
+                             title: "Создать форум -" + title,
+                             __proto__: new EntriesData(req),
+                             parts: parts
+                            });
 
 });
 
 app.get("/:forumURN/createTopic", jpars, function(req, res) {
  if (visiters.get(req.cookies['tempId']).access > 1) res.render("createTopic", {
-                                                                                              title: "Создать тему -" + title,
-                                                                                              __proto__: new EntriesData(req)
-                                                                                             });
+                                                                                title: "Создать тему -" + title,
+                                                                                __proto__: new EntriesData(req)
+                                                                               });
    else res.send('У вас нет доступа.')
 });
 
@@ -653,11 +645,10 @@ app.get("/profile/:userId", async function (req, res) {
                                            isDeleted: (!user.length),
                                            isUnder: (user.length && visiters.get(req.cookies['tempId']).access > user[0].access ),
                                            isModerator: (user.length && user[0].access == 3),
-                                           online:  allWhoAlive(),
                                            isLive: isLive,
                                            lastComing:  profile[0].lastComing,
                                            referer: req.headers.referer,
-                                            __proto__: new EntriesData(req)
+                                           __proto__: new EntriesData(req)
                                          });
 });
 
