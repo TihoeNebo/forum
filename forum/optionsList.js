@@ -179,8 +179,9 @@ export function getSubscribeOptions(e) {
     let subsTemplate = `<div id = 'subscribeList'>`;
     subsList.forEach( (item) => {
     
-      subsTemplate += `<div class='me'><a href='/${item['forumURN']}/${item.topicId}'>${item.theme}</a><br>${item.comment}
-        <input type='button' class='deleteSub' data-forum='${item.forumURN}' data-topic='${item.topicId}' value='Отписаться' /></div>`;
+      subsTemplate += `<div class='me'><button class='deleteSub' data-forum='${item.forumURN}' data-topic='${item.topicId}'>Отписаться</button>
+          <a href='/${item['forumURN']}/${item.topicId}'>${item.theme}</a><br>${item.comment}
+        </div>`;
     });
     subsTemplate +=`</div>`;
     document.forms.subscribeOptions.insertAdjacentHTML('beforeEnd', subsTemplate)
