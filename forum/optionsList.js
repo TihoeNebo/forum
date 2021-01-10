@@ -228,8 +228,9 @@ export function getBlackListOptions() {
     if (!ignorList.length) return  document.forms.blackListOptions.insertAdjacentHTML('beforeEnd',`<div id = 'ignorList'>пусто</div>`);
     let template = `<div id = 'ignorList'>`;
     ignorList.forEach( (item) => {
-      template += `<div class='from'><a href='/profile/${item.userId}'>${item.userName}</a>
-        <input type='button' class='forgive' data-userid='${item.userId}' value='Понять, простить..' /></div>`;
+      template += `<div class='from'><button class='forgive' data-userid='${item.userId}'>Понять, простить..</button>
+          <a href='/profile/${item.userId}'>${item.userName}</a>
+        </div>`;
     });
     template +=`</div>`;
     document.forms.blackListOptions.insertAdjacentHTML('beforeEnd', template);
