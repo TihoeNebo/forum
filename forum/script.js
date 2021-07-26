@@ -224,8 +224,7 @@ document.onmouseover = (e) => {
 document.onclick = async (e) => {
 
   let target = e.target;
-  let settedButton = '';
-
+//alert(target);
   if (document.getElementById('inbox') && (target.id != 'inbox' || target.id != 'inboxlist') ) document.getElementById('inboxlist').hidden = true;
   if (document.getElementById('notifies') && (target.id != 'notifies' || target.id != 'notifiesList') ) document.getElementById('notifiesList').hidden = true;
 
@@ -241,6 +240,9 @@ document.onclick = async (e) => {
     switch(target.id){
      case 'account':
        requests.getAccountOptions(target);
+       break;
+     case 'avatar':
+       requests.getAvatarOptions(target);
        break;
      case 'profile':
        requests.getProfileOptions(e);
@@ -758,7 +760,7 @@ document.onclick = async (e) => {
     let target = sortParentTree(e.target);
     if ( target == document.body ) return;
     if( target.classList.contains('post') ) {
-      document.getElementById('sendPost').hidden = true;
+     // document.getElementById('sendPost').hidden = true;
       let st = '';
       let post = target;
       let con = post.getElementsByClassName('content')[0].childNodes;
@@ -910,7 +912,7 @@ function sayH() {
         ajax.onerror = () => {clearInterval(pulse); alert('stop');}
       }
 
-let pulse = setInterval(sayH, 300000);
+let pulse = setInterval(sayH, 180000);
 
 function reloadPMstream (userId) {
   ajax.open('POST', `/getSession?id=${userId}`);

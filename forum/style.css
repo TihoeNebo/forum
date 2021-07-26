@@ -368,22 +368,31 @@ form[name='createForum'] {
   width: 150px;
 }
 
-.login, .registration, .redactMenu, #changeDestination, #messager {
+.login, .registration, .redactMenu, 
+#changeDestination, #messager, #avatarField {
   top: calc(50% - 200px);
-  left: calc(50% - 175px);
+  left: calc(40% - 175px);
   border-width: 1px;
   border-color: #f5fdff;
   border-style: solid;
   display: fixed;
   position: fixed;
-  width: 300px;
-  height: 280px;
+  min-width: 300px;
+  min-height: 80px;
   z-index: 2;
   background-color: #020107;
   padding: 20px;
   text-align: justify;
   color: #fbf9c0;
  }
+
+#resolution {
+  position: fixed;
+  margin: 0;
+  padding: 0;
+  border-color: gray;
+  background-color: transparent;
+}
 
 .partName .redactMenu, .forumName .redactMenu, 
 .topic .redactMenu {
@@ -489,6 +498,15 @@ form[name='createForum'] {
 .me input, .from input{
   position: relative;
   right: -20%;
+}
+
+.point {
+  display: inline-block;
+  position: relative;
+  margin: 2px;
+  padding: 5px;
+  width: 0px;
+  background-color: gray;
 }
 
 .session, .notify {

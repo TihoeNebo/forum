@@ -112,9 +112,10 @@ export async function getProfileOptions(e) {
   let sexVal = sexArr.find(item => +item.value == +sex);
   sexVal.checked = true;
 
+
   document.getElementById('optionBoard').onclick = (e)=> {
-    let target = e.target;
     let profileOptions = document.forms.profileOptions.elements;
+    let target = e.target;
 
     if (target.id == 'changeName') {
       let userName = profileOptions.userName.value;
@@ -158,6 +159,158 @@ export async function getProfileOptions(e) {
   };
 }
 
+/*export function getAvatarOptions(e) {
+
+let template = `
+      <form name='avatarOptions'> 
+        <fieldset>Добавить аватар:<br>
+          <input type='file' name='avatar'>
+        </fieldset>
+      </form>`;
+  document.getElementById('optionBoard').innerHTML = template;
+  let avatarOptions = document.forms.avatarOptions.elements;
+
+  avatarOptions.avatar.onchange = function() {
+    let avatarFrame = {};
+    let file = this.files[0];
+    let image = document.createElement('img');
+    image.src = URL.createObjectURL(file);
+    
+    image.onload = ()=> {
+      URL.revokeObjectURL(image.src);
+      let avatarField = document.createElement('div');
+      avatarField.id = 'avatarField';
+      document.body.appendChild(avatarField);
+      avatarField.appendChild(image);
+      let computedImage = getComputedStyle(image);
+      let height = +computedImage.height.replace(/px/, "");
+      let width = +computedImage.width.replace(/px/, "");
+
+
+      if (width >= height) {
+        image.style.maxWidth = '360px';
+        computedImage = getComputedStyle(image);
+        let height = +computedImage.height.replace(/px/, "");
+        avatarFrame.height = height;
+        avatarFrame.width = height/4*3;
+      } else {
+        image.style.maxHeight = '360px'; 
+        computedImage = getComputedStyle(image);
+        let width = +computedImage.width.replace(/px/, "");
+        avatarFrame.height = width;
+        avatarFrame.width = width/4*3;
+      }
+
+      let imageCoords = image.getBoundingClientRect();
+      let resolutionSquare = document.createElement('div');
+      resolutionSquare.id = 'resolution';
+      resolutionSquare.style.top = imageCoords.top +'px';
+      resolutionSquare.style.left = imageCoords.left +'px';
+      resolutionSquare.style.width = (avatarFrame.width - 2) + 'px';
+      resolutionSquare.style.height = (avatarFrame.height - 2) + 'px';
+      avatarField.appendChild(resolutionSquare);      
+
+      let topLeftPoint = document.createElement('div');
+      topLeftPoint.id = 'topLeftPoint';
+      topLeftPoint.classList.add('point');
+      topLeftPoint.style.top = '-3px';
+      topLeftPoint.style.left = '-2px';
+      resolutionSquare.appendChild(topLeftPoint);
+  
+      let topRightPoint = document.createElement('div');
+      topRightPoint.id = 'topRightPoint';
+      topRightPoint.classList.add('point');
+      topRightPoint.style.top = '-3px';
+      topRightPoint.style.left = (avatarFrame.width - 31) +'px';
+      resolutionSquare.appendChild(topRightPoint);
+
+      let bottomLeftPoint = document.createElement('div');
+      bottomLeftPoint.id = 'bottomLeftPoint';
+      bottomLeftPoint.classList.add('point');
+      bottomLeftPoint.style.top = (avatarFrame.height - 15) +'px';
+      bottomLeftPoint.style.left = '-35px';
+      resolutionSquare.appendChild(bottomLeftPoint);
+
+      let bottomRightPoint = document.createElement('div');
+      bottomRightPoint.id = 'bottomRightPoint';
+      bottomRightPoint.classList.add('point');
+      bottomRightPoint.style.top = ( avatarFrame.height - 15) +'px';
+      bottomRightPoint.style.left = (avatarFrame.width - 63) +'px';
+      resolutionSquare.appendChild(bottomRightPoint);
+
+      let recentCoords = {};
+
+      bottomRightPoint.onmousedown = (e) => {
+        recentCoords.clientX = e.clientX;
+        recentCoords.clientY = e.clientY;
+
+        bottomRightPoint.onmousemove = (e) => {
+          let squareParams = getComputedStyle(resolutionSquare);
+          let newCoords = {};
+          newCoords.clientX = e.clientX - recentCoords.clientX;
+          newCoords.clientY = e.clientY - recentCoords.clientY;
+          recentCoords.clientX = e.clientX;
+          recentCoords.clientY = e.clientY;  
+          let newWidth = 0;
+          let newHeight = 0;
+          if ( Math.abs(newCoords.clientX) >= Math.abs(newCoords.clientY) ) {
+            newWidth = +squareParams.width.replace(/px/, "") + newCoords.clientX;
+            newHeight = newWidth*4/3;
+          } else {
+            newHeight = +squareParams.height.replace(/px/, "") + newCoords.clientY;
+            newWidth = newHeight*3/4;
+          }
+          resolutionSquare.style.width = newWidth + 'px';
+          resolutionSquare.style.height = newHeight + 'px';
+
+          bottomRightPoint.onmouseup = (e) => {
+            bottomRightPoint.onmousemove = null;
+          };
+        };
+      };
+      resolutionSquare.onmousedown = (e) => {
+        recentCoords.clientX = e.clientX;
+        recentCoords.clientY = e.clientY;
+
+        resolutionSquare.onmousemove = (e) => {
+          let squareParams = getComputedStyle(resolutionSquare);
+          let squareCoords = resolutionSquare.getBoundingClientRect();
+          let newCoords = {};
+          newCoords.clientX = e.clientX - recentCoords.clientX;
+          newCoords.clientY = e.clientY - recentCoords.clientY;
+          recentCoords.clientX = e.clientX;
+          recentCoords.clientY = e.clientY;   
+
+          if (imageCoords.top > (squareCoords.top + newCoords.clientY) ) {
+            resolutionSquare.style.top = imageCoords.top +'px';
+          }  else if (imageCoords.bottom < (squareCoords.bottom + newCoords.clientY) ) {
+            resolutionSquare.style.top = ( imageCoords.bottom - +squareParams.height.replace(/px/, "") - 2 ) +'px';
+          } else {
+            resolutionSquare.style.top = (squareCoords.top + newCoords.clientY) +'px';
+          }
+
+          if (imageCoords.left > (squareCoords.left + newCoords.clientX) ) {
+            resolutionSquare.style.left = imageCoords.left +'px';
+          }  else if (imageCoords.right < (squareCoords.right + newCoords.clientX) ) {
+            resolutionSquare.style.left = ( imageCoords.right - +squareParams.width.replace(/px/, "") - 2 ) +'px';
+          } else {
+            resolutionSquare.style.left = (squareCoords.left + newCoords.clientX) +'px';
+          }
+
+          resolutionSquare.onmouseup = (e) => {
+            resolutionSquare.onmousemove = null;
+          };
+        };
+      };
+
+
+    }
+
+
+  }
+}
+
+*/
 export function getSubscribeOptions(e) {
   let mode = +e.target.dataset.mode;
   let subOnTopics = (mode & 2) ? `checked`: ``;
@@ -175,7 +328,7 @@ export function getSubscribeOptions(e) {
   ajax.send();
   ajax.onload = ()=> {
     let subsList = JSON.parse(ajax.response) ;
-    if (!subsList.length) return  document.forms.subscribeOptions.insertAdjacentHTML('beforeEnd',`<div id = 'subscribeList'>пусто</div>`);
+    if (!subsList.length) return  document.forms.subscribeOptions.insertAdjacentHTML('afterEnd',`<div id = 'subscribeList'>пусто</div>`);
     let subsTemplate = `<div id = 'subscribeList'>`;
     subsList.forEach( (item) => {
     
@@ -184,18 +337,24 @@ export function getSubscribeOptions(e) {
         </div>`;
     });
     subsTemplate +=`</div>`;
-    document.forms.subscribeOptions.insertAdjacentHTML('beforeEnd', subsTemplate)
+    document.forms.subscribeOptions.insertAdjacentHTML('afterEnd', subsTemplate)
   };
+
   document.getElementById('optionBoard').onclick = (e)=> {
     let target = e.target;
+
     if ( target.classList.contains('deleteSub') ) {
+
       let forum = target.dataset.forum;
       let topic = target.dataset.topic;
+
+      let ajax = new XMLHttpRequest();
       ajax.open('DELETE', `/me/delSubscribes?forum=${forum}&topicId=${topic}`);
       ajax.setRequestHeader('Content-type', 'application/json'); 
-      ajax.send();
+      ajax.send("1");
       ajax.onload = ()=> {
-        window.location.reload();
+
+       // window.location.reload();
       };
     }
   };
