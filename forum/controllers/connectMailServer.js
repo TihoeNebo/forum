@@ -1,7 +1,7 @@
 ﻿const mailer = require("nodemailer");
 const trans = mailer.createTransport({
   service: 'gmail',
-  auth: {user: 'tihoe.nebo@gmail.com', pass: 'idinahuy3raza!!'}
+  auth: {user: 'adress@gmail.com', pass: 'password'} //только google
 });
 
 console.log("Модуль connectMailServer.js подключен");
