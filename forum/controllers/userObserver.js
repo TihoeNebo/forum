@@ -8,11 +8,19 @@ console.log( "Подключен модуль userObserver.js");
 
 exports.getNotifies = async function(self) {
   self.notifies = [];
-  let [news] = await connection.query(await sqlGetAllNew()).catch( err  => console.log(err) );
-  news.forEach( item => { item.postDate = new Date(item.postDate); } );
+  let sqlRequest = await sqlGetAllNew();
+  let news = null;
+  if (sqlRequest)
+    {
+	news = await connection.query(sqlRequest).catch( err  => console.log(err) );
+	[news] = news;
+    }
+  if(news) { 
+    news.forEach( item => { item.postDate = new Date(item.postDate); } );
+  }
   self.subscribes.forEach( (sub) => {
     sub.lastComing = new Date(sub.lastComing);
-    let notify = news.find( item => item.forumURN == sub.forumURN && item.topicId == sub.topicId );
+    let notify = (news) ? news.find( item => item.forumURN == sub.forumURN && item.topicId == sub.topicId ) : null;
     if(notify) {
       if (sub.lastComing < notify.postDate) self.notifies.push(notify); 
     }
@@ -84,6 +92,7 @@ exports.isLiveChecking = function (control, online) {
 
 async function sqlGetAllNew () {
   let [forums] = await connection.query(`select forumURN from forums`).catch( err  => console.log(err) );
+	if (!forums.length) { console.log("zdes"); return null; }
   let sqlPosts = `select forums.forumURN, ${forums[0].forumURN}_topics.topicId, ${forums[0].forumURN}_topics.theme, max(${forums[0].forumURN}_posts.postId) as postId, max(${forums[0].forumURN}_posts.postDate) as postDate, ${forums[0].forumURN}_posts.userId
     from ${forums[0].forumURN}_topics 
     join forums on forums.forumId = ${forums[0].forumURN}_topics.forumId 
